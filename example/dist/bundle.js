@@ -10,20 +10,31 @@
     fn(localRequire, module, module.exports);
     return module.exports;
   }
-  require("./main.js");
+  require(1);
 })({
   1: [
     function (require, module, exports) {
-      const foo = require("./foo.js").foo;
-      foo();
+      "use strict";
+
+      var _foo = require("./foo.js");
+
+      (0, _foo.foo)();
     },
-    { ".foo.js": 2 },
+    { "./foo.js": 2 },
   ],
+
   2: [
     function (require, module, exports) {
-      exports.foo = function () {
+      "use strict";
+
+      Object.defineProperty(exports, "__esModule", {
+        value: true,
+      });
+      exports.foo = foo;
+
+      function foo() {
         console.log("foo");
-      };
+      }
     },
     {},
   ],
