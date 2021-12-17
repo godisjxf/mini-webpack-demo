@@ -5,9 +5,16 @@ const traverse = require("@babel/traverse").default;
 const { transformFromAst } = require("babel-core");
 const ejs = require("ejs");
 let count = 1;
-
+let globalConfig = {};
 function asserts(fileName) {
-  const source = fs.readFileSync(fileName, "utf-8");
+  let source = fs.readFileSync(fileName, "utf-8");
+  const rules = globalConfig.module.rules;
+  rules.forEach(({ test, use: loader }) => {
+    if (test.test(fileName)) {
+      source = loader(source);
+    }
+  });
+  console.log(source);
   const ast = parser.parse(source, { sourceType: "module" });
   let deps = [];
   traverse(ast, {
@@ -25,10 +32,10 @@ function asserts(fileName) {
     mapping: {},
   };
 }
-function creatGraph(fileName) {
-  let mainAsset = asserts(fileName);
+function creatGraph() {
+  let mainAsset = asserts(globalConfig.entry);
   let queue = [mainAsset];
-  let base = path.dirname(fileName);
+  let base = path.dirname(globalConfig.entry);
   for (const module of queue) {
     module.deps.forEach((relativePath) => {
       const asset = asserts(path.resolve(base, relativePath));
@@ -59,4 +66,19 @@ function bundle(graph) {
   }
   emitFile(code);
 }
-bundle(creatGraph("./example/main.js"));
+const myLoader = function () {
+  console.log("myLoader");
+  return "export default 'this myLoader'";
+};
+const webpackConfig = {
+  entry: "./example/main.js",
+  module: {
+    rules: [{ test: /.md$/, use: myLoader }],
+  },
+};
+function webpack(config) {
+  globalConfig = config;
+  const graph = creatGraph(config.entry);
+  bundle(graph);
+}
+webpack(webpackConfig);
