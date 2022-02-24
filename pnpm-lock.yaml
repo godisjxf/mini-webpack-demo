@@ -7,6 +7,10 @@ specifiers:
   babel-preset-env: ^1.7.0
   babel-traverse: ^6.26.0
   ejs: ^3.1.6
+  tapable: ^2.2.1
+
+dependencies:
+  tapable: 2.2.1
 
 devDependencies:
   '@babel/parser': 7.16.6
@@ -949,6 +953,11 @@ packages:
     dependencies:
       has-flag: 3.0.0
     dev: true
+
+  /tapable/2.2.1:
+    resolution: {integrity: sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==}
+    engines: {node: '>=6'}
+    dev: false
 
   /to-fast-properties/1.0.3:
     resolution: {integrity: sha1-uDVx+k2MJbguIxsG46MFXeTKGkc=, tarball: to-fast-properties/download/to-fast-properties-1.0.3.tgz}

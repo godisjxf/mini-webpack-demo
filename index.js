@@ -4,8 +4,14 @@ const parser = require("@babel/parser");
 const traverse = require("@babel/traverse").default;
 const { transformFromAst } = require("babel-core");
 const ejs = require("ejs");
+const { SyncHook, AsyncSeriesHook } = require("tapable");
+const MyPlugin = require("./example/myPlugin");
 let count = 1;
 let globalConfig = {};
+let hooks = {
+  run: new SyncHook(),
+  emit: new AsyncSeriesHook(["compiler"]),
+};
 function asserts(fileName) {
   let source = fs.readFileSync(fileName, "utf-8");
   const rules = globalConfig.module.rules;
@@ -33,6 +39,7 @@ function asserts(fileName) {
   };
 }
 function creatGraph() {
+  hooks.run.call();
   let mainAsset = asserts(globalConfig.entry);
   let queue = [mainAsset];
   let base = path.dirname(globalConfig.entry);
@@ -66,6 +73,11 @@ function bundle(graph) {
   }
   emitFile(code);
 }
+function initPlugins() {
+  globalConfig.plugins.forEach((plugin) => {
+    plugin.apply?.call(plugin, { hooks });
+  });
+}
 const myLoader = function () {
   console.log("myLoader");
   return "export default 'this myLoader'";
@@ -75,10 +87,15 @@ const webpackConfig = {
   module: {
     rules: [{ test: /.md$/, use: myLoader }],
   },
+  plugins: [new MyPlugin()],
 };
 function webpack(config) {
   globalConfig = config;
+  initPlugins();
   const graph = creatGraph(config.entry);
+  hooks.emit.callAsync([{ type: "compilation" }], () => {
+    console.log("emit 处理完毕");
+  });
   bundle(graph);
 }
 webpack(webpackConfig);

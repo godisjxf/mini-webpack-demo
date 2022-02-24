@@ -10,7 +10,7 @@
     fn(localRequire, module, module.exports);
     return module.exports;
   }
-  require("./main.js");
+  require(1);
 })({
   1: [
     function (require, module, exports) {
